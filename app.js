@@ -1,27 +1,29 @@
-const express = require('express');
-const path = require('path');
-const bodyParser = require('body-parser');
+express = require('express');
+const session = require('express-session');
+const passport = require('passport');
+const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
+const authRoutes = require('./routes/auth');
+const postRoutes = require('./routes/posts');
+const passportConfig = require('./config/passport-setup');
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-// Connect to the database
+// Connect to database
 connectDB();
 
 // Middleware
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.static(path.join(__dirname, 'public')));
-app.set('view engine', 'ejs');
+app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 
-// Routes
-app.use('/auth', require('./routes/auth'));
-app.use('/posts', require('./routes/posts'));
-
-app.get('/', (req, res) => res.render('index'));
-app.get('/login', (req, res) => res.render('login'));
-app.get('/register', (req, res) => res.render('register'));
-app.get('/profile', (req, res) => res.render('profile'));
-
-// Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Set view engine
