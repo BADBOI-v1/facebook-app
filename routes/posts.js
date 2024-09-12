@@ -1,4 +1,3 @@
-```javascript
 const express = require('express');
 const Post = require('../models/Post');
 const User = require('../models/User');
